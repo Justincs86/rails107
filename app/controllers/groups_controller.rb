@@ -1,5 +1,5 @@
 class GroupsController < ApplicationController
-  before_action :authenticate_user!, only: [:new, :create, :edit, :update, :destroy]
+  before_action :authenticate_user!, only: [:new, :create, :edit, :update, :destroy, :join, :quit]
   before_action :find_group_and_check_permission, only: [:edit, :update, :destroy]
 
   def index
@@ -44,6 +44,31 @@ class GroupsController < ApplicationController
       redirect_to groups_path, alert: "Group Deleted"
   end
 
+  def join
+    @group = Group.find(params[:id])
+
+    if !current_user.is_member_of?(@group)
+      current_user.join!(@group)
+      flash[:notice] = "Joined Group"
+    else
+      flash[:warning] = "Registered Member"
+    end
+
+    redirect_to group_path(@group)
+  end
+
+  def quit
+    @group = Group.find(params[:id])
+
+    if current_user.is_member_of?(@group)
+      current_user.quit!(@group)
+      flash[:alert] = "Quited Group"
+    else
+      flash[:warning] = "Your Are Not Group Memer"
+    end
+
+    redirect_to group_path(@group)
+  end
 
 
 
